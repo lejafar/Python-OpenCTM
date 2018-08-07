@@ -16,7 +16,8 @@ setup(
     license='zlib License',
     packages=['openctm'],
     package_data={
-        'openctm': ['libopenctm.dylib'],
+        'openctm': ['libs/libopenctm.dylib',
+                    'libs/libopenctm.so'],
     },
     install_requires=[
           'numpy>=1.14.2',
@@ -26,5 +27,6 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: zlib/libpng License",
         "Operating System :: MacOS",
+        "Operating System :: POSIX :: Linux",
     )
 )

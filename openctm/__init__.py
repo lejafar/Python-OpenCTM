@@ -1,1 +1,1 @@
-from .io import open_ctm, CtmFile
+from .io import open, CtmFile
