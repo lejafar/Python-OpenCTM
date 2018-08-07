@@ -6,11 +6,11 @@ class BinaryDistribution(Distribution):
         return True
 
 setup(
-    name='python-ctm',
-    version='1.0.2',
-    description='Python bindings for the OpenCTM Library',
-    long_description='Python bindings for the OpenCTM Library',
-    url='https://github.com/lejafar/python-ctm',
+    name='python-openctm',
+    version='1.0.0',
+    description='Python Interface for the OpenCTM Library',
+    long_description='Python Interface for the OpenCTM Library',
+    url='https://github.com/lejafar/python-openctm',
     author='Rafael Hautekiet',
     author_email='rafael.hautekiet@oqton.ai',
     license='zlib License',

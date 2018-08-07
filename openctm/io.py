@@ -3,7 +3,7 @@ import numpy as np
 from contextlib import contextmanager
 
 @contextmanager
-def open_ctm(filename):
+def open(filename):
     ctm_context = ctmNewContext(CTM_IMPORT)
     yield CtmFile(ctm_context, filename)
     ctmFreeContext(ctm_context)
