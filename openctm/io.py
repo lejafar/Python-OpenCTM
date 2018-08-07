@@ -12,7 +12,7 @@ class CtmFile:
 
     def __init__(self, ctm_context, filename):
         self.ctm = ctm_context
-        ctmLoad(self.ctm, filename)
+        ctmLoad(self.ctm, str(filename).encode('utf-8'))
         err = ctmGetError(self.ctm)
         if err != CTM_NONE:
             raise IOError("Error loading file: " + str(ctmErrorString(err)))
