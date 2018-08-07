@@ -14,7 +14,7 @@ pip install python-openctm
 ```python
 import openctm
 
-with openctm.open_ctm('foo.ctm') as ctm_file:
+with openctm.open('foo.ctm') as ctm_file:
   vertices = ctm_file.get_vertices()
   faces = ctm_file.get_faces()
 
