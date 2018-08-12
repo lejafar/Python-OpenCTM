@@ -1,9 +1,5 @@
-from setuptools import setup, Distribution
+from setuptools import setup, Distribution, Extension
 import sys
-
-class BinaryDistribution(Distribution):
-    def has_ext_modules(foo):
-        return True
 
 setup(
     name='python-openctm',
@@ -14,6 +10,7 @@ setup(
     author='Rafael Hautekiet',
     author_email='rafael.hautekiet@oqton.ai',
     license='zlib License',
+    ext_modules=[Extension('_foo', ['stub.cc'])],
     packages=['openctm'],
     package_data={
         'openctm': ['libs/libopenctm.dylib',
@@ -22,7 +19,6 @@ setup(
     install_requires=[
           'numpy>=1.14.2',
       ],
-    distclass=BinaryDistribution,
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: zlib/libpng License",

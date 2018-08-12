@@ -15,6 +15,7 @@ env:
     - TWINE_USERNAME=lejafar
 
 script:
+  - touch stub.cc
   - $PIP install cibuildwheel==0.7.1
   - cibuildwheel --output-dir wheelhouse
   - |
