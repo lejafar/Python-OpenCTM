@@ -1,3 +1,4 @@
+apt-get install libgtk2.0-dev
 git clone https://github.com/Danny02/OpenCTM.git openctm_tmp
 make -C openctm_tmp -f $1
 mkdir openctm/libs

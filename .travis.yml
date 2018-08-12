@@ -22,13 +22,15 @@ env:
     - TWINE_USERNAME=lejafar
 
 script:
-  - docker run -v $PWD/openctm:/openctm -v $PWD/travis:/travis quay.io/pypa/manylinux1_x86_64 bash /travis/build-openctm.sh $MAKEFILE $LIB_NAME
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      bash /travis/build-openctm.sh $MAKEFILE $LIB_NAME
       $PIP install pyOpenSSL ndg-httpsclient pyasn1
+    else
+      docker run -v $PWD/openctm:/openctm -v $PWD/travis:/travis quay.io/pypa/manylinux1_x86_64 bash /travis/build-openctm.sh $MAKEFILE $LIB_NAME
     fi
   - $PIP install cibuildwheel==0.7.1
   - touch stub.cc
   - cibuildwheel --output-dir wheelhouse
   - python -m pip install twine
-  - python -m twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
+  - python -m twine upload wheelhouse/*.whl
