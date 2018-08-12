@@ -2,7 +2,8 @@
 
 # If on Linux, install GTK2
 if [[ uname == 'Linux' ]]; then
-  yum install gtk2-devel -y
+  yum groupinstall "Development Tools" -y
+  yum install gtk+-devel gtk2-devel -y
 fi
 
 git clone https://github.com/Danny02/OpenCTM.git openctm_tmp
