@@ -22,12 +22,7 @@ env:
     - TWINE_USERNAME=lejafar
 
 script:
-  - |
-    git clone https://github.com/Danny02/OpenCTM.git openctm_tmp
-    make -C openctm_tmp -f $MAKEFILE
-    mkdir openctm/libs
-    mv openctm_tmp/lib/$LIB_NAME openctm/libs
-    ls -la openctm/libs
+  - docker run -v openctm:openctm quay.io/pypa/manylinux1_x86_64 bash travis/build-openctm.sh $MAKEFILE $LIB_NAME
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       $PIP install pyOpenSSL ndg-httpsclient pyasn1
