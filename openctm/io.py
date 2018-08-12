@@ -1,48 +1,80 @@
 from .openctm import *
 import numpy as np
-from contextlib import contextmanager
 
-@contextmanager
-def open(filename):
+
+class CTM:
+
+    def __init__(self, _vertices, _faces, _normals=None):
+        self.vertices = _vertices
+        self.faces = _faces
+        self.normals = _normals
+
+    def __eq__(self, other):
+        return (self.vertices == other.vertices).all() and (self.faces == other.faces).all()
+
+
+def import_mesh(_filename):
     ctm_context = ctmNewContext(CTM_IMPORT)
-    yield CtmFile(ctm_context, filename)
-    ctmFreeContext(ctm_context)
-
-class CtmFile:
-
-    def __init__(self, ctm_context, filename):
-        self.ctm = ctm_context
-        ctmLoad(self.ctm, str(filename).encode('utf-8'))
-        err = ctmGetError(self.ctm)
+    try:
+        ctmLoad(ctm_context, str(_filename).encode('utf-8'))
+        err = ctmGetError(ctm_context)
         if err != CTM_NONE:
-            raise IOError("Error loading file: " + str(ctmErrorString(err)))
+            raise IOError("Error loading file: %s" % str(ctmErrorString(err)))
 
-    def get_vertices(self):
-        # get vertices
-        vertex_count = ctmGetInteger(self.ctm, CTM_VERTEX_COUNT)
-        vertex_ctm = ctmGetFloatArray(self.ctm, CTM_VERTICES)
-        # use fromiter to avoid loop
+        # read vertices
+        vertex_count = ctmGetInteger(ctm_context, CTM_VERTEX_COUNT)
+        vertex_ctm = ctmGetFloatArray(ctm_context, CTM_VERTICES)
+
         vertices = np.fromiter(vertex_ctm,
                                dtype=np.float,
                                count=vertex_count * 3).reshape((-1, 3))
-        return vertices
 
-    def get_faces(self):
-        # get faces
-        face_count = ctmGetInteger(self.ctm, CTM_TRIANGLE_COUNT)
-        face_ctm = ctmGetIntegerArray(self.ctm, CTM_INDICES)
+        # read faces
+        face_count = ctmGetInteger(ctm_context, CTM_TRIANGLE_COUNT)
+        face_ctm = ctmGetIntegerArray(ctm_context, CTM_INDICES)
         faces = np.fromiter(face_ctm,
                             dtype=np.int,
                             count=face_count * 3).reshape((-1, 3))
-        return faces
 
-    def get_face_normals(self):
-        if ctmGetInteger(self.ctm, CTM_HAS_NORMALS) == CTM_TRUE:
-            normals_ctm = ctmGetFloatArray(self.ctm, CTM_NORMALS)
+        # read face normals
+        normals = None
+        if ctmGetInteger(ctm_context, CTM_HAS_NORMALS) == CTM_TRUE:
+            normals_ctm = ctmGetFloatArray(ctm_context, CTM_NORMALS)
             normals = np.fromiter(normals_ctm,
                                   dtype=np.float,
                                   count=face_count * 3).reshape((-1, 3))
-            return normals
-        # if not available return None
+    finally:
+        ctmFreeContext(ctm_context)
+
+    return CTM(vertices, faces, normals)
+
+
+def export_mesh(_ctm, _filename):
+    ctm_context = ctmNewContext(CTM_EXPORT)
+
+    try:
+        vertex_count = len(_ctm.vertices)
+        vertices = _ctm.vertices.reshape((-1, 1))
+        p_vertices = ctypes.cast((CTMfloat * vertex_count * 3)(), ctypes.POINTER(CTMfloat))
+        for i in range(vertex_count * 3):
+            p_vertices[i] = CTMfloat(vertices[i])
+
+        face_count = len(_ctm.faces)
+        faces = _ctm.faces.reshape((-1, 1))
+        p_faces = ctypes.cast((CTMuint * face_count * 3)(), ctypes.POINTER(CTMuint))
+        for i in range(face_count * 3):
+            p_faces[i] = CTMuint(faces[i])
+
+        if _ctm.normals:
+            normal_count = len(_ctm.normals)
+            normals = _ctm.normals.reshape((-1, 1))
+            p_normals = ctypes.cast((CTMfloat * normal_count * 3)(), ctypes.POINTER(CTMfloat))
+            for i in range(normal_count * 3):
+                p_normals[i] = CTMfloat(normals[i])
         else:
-            return None
+            p_normals = None
+
+        ctmDefineMesh(ctm_context, p_vertices, CTMuint(vertex_count), p_faces, CTMuint(face_count), p_normals)
+        ctmSave(ctm_context, ctypes.c_char_p(_filename.encode('utf-8')))
+    finally:
+        ctmFreeContext(ctm_context)

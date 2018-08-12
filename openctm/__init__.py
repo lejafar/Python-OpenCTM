@@ -1,1 +1,1 @@
-from .io import open, CtmFile
+from .io import import_mesh, export_mesh
