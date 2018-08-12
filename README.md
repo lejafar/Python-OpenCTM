@@ -1,4 +1,6 @@
-# Python-OpenCTM [WIP]
+Python-OpenCTM
+==============
+[![Build Status](https://travis-ci.org/lejafar/Python-OpenCTM.svg?branch=master)](https://travis-ci.org/lejafar/Python-OpenCTM)
 ### Python Interface for the Open-CTM Library
 
 Python-OpenCTM is an (unofficial) Python interface for the [OpenCTM](https://github.com/Danny02/OpenCTM) file format. A format that allows a geometry to be compressed to a fraction of comparable file formats (3DS, STL, COLLADA...).

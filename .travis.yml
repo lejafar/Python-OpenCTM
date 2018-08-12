@@ -12,6 +12,7 @@ matrix:
 
 env:
   global:
+    - CIBW_SKIP=cp33-*
     - TWINE_USERNAME=lejafar
 
 script:
