@@ -26,7 +26,6 @@ setup(
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: zlib/libpng License",
-        "Operating System :: MacOS",
-        "Operating System :: POSIX :: Linux",
+        "Operating System :: OS Independent",
     )
 )
