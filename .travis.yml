@@ -18,7 +18,6 @@ matrix:
 
 env:
   global:
-    - CIBW_SKIP=cp33-*
     - TWINE_USERNAME=lejafar
 
 script:
@@ -29,7 +28,7 @@ script:
     else
       docker run -v $PWD/openctm:/openctm -v $PWD/travis:/travis quay.io/pypa/manylinux1_x86_64 bash /travis/build-openctm.sh $MAKEFILE $LIB_NAME
     fi
-  - $PIP install cibuildwheel==0.7.1
+  - $PIP install cibuildwheel==0.9.4
   - touch stub.cc
   - cibuildwheel --output-dir wheelhouse
   - python -m pip install twine
