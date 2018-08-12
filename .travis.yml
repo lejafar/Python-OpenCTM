@@ -22,7 +22,7 @@ env:
     - TWINE_USERNAME=lejafar
 
 script:
-  - docker run -v ${PWD}/openctm:openctm quay.io/pypa/manylinux1_x86_64 bash travis/build-openctm.sh $MAKEFILE $LIB_NAME
+  - docker run -v $PWD/openctm:/openctm quay.io/pypa/manylinux1_x86_64 bash travis/build-openctm.sh $MAKEFILE $LIB_NAME
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       $PIP install pyOpenSSL ndg-httpsclient pyasn1
