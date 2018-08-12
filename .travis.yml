@@ -3,7 +3,6 @@ language: python
 matrix:
   include:
     - sudo: required
-      dist: precise
       services:
         - docker
       env:
@@ -28,9 +27,10 @@ script:
     make -C openctm_tmp -f $MAKEFILE
     mkdir openctm/libs
     mv openctm_tmp/lib/$LIB_NAME openctm/libs
+    ls -la openctm/libs
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      $PIP install --upgrade pyOpenSSL
+      $PIP install pyOpenSSL ndg-httpsclient pyasn1
     fi
   - $PIP install cibuildwheel==0.7.1
   - touch stub.cc
