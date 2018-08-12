@@ -5,10 +5,16 @@ matrix:
     - sudo: required
       services:
         - docker
-      env: PIP=pip
+      env:
+        - PIP=pip
+        - MAKEFILE=Makefile.linux
+        - LIB_NAME=libopenctm.so
     - os: osx
       language: generic
-      env: PIP=pip2
+      env:
+        - PIP=pip2
+        - MAKEFILE=Makefile.macosx
+        - LIB_NAME=libopenctm.dylib
 
 env:
   global:
@@ -16,8 +22,17 @@ env:
     - TWINE_USERNAME=lejafar
 
 script:
-  - touch stub.cc
+  - |
+    git clone https://github.com/Danny02/OpenCTM.git openctm_tmp
+    make -C openctm_tmp -f $MAKEFILE
+    mkdir openctm/libs
+    mv openctm_tmp/lib/$LIB_NAME openctm/libs
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      pip install --upgrade pyOpenSSL
+    fi
   - $PIP install cibuildwheel==0.7.1
+  - touch stub.cc
   - cibuildwheel --output-dir wheelhouse
   - python -m pip install twine
   - python -m twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
