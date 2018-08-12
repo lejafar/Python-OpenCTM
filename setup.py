@@ -3,7 +3,7 @@ import sys
 
 setup(
     name='python-openctm',
-    version='1.0.1',
+    version='1.0.2',
     description='Python Interface for the OpenCTM Library',
     long_description='Python Interface for the OpenCTM Library',
     url='https://github.com/lejafar/python-openctm',
