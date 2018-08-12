@@ -20,6 +20,9 @@ env:
   global:
     - TWINE_USERNAME=lejafar
 
+before_script:
+  - python3 -m unittest discover -s tests/  -vvv
+  
 script:
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
