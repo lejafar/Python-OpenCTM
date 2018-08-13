@@ -30,7 +30,8 @@ install:
     fi
 
 before_script:
-  - python3 -m unittest discover -s tests/  -vvv
+  - $PIP install numpy
+  - python -m unittest discover -s tests/  -vvv
 
 script:
   - $PIP install cibuildwheel==0.9.4
