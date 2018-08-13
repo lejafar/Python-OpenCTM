@@ -95,7 +95,7 @@ CTM_ATTRIB_MAP_8 = 0x0807
 # depending on os chose you binary ...
 if sys.platform == 'darwin':
     _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs/libopenctm.dylib')
-elif sys.platform == 'linux':
+elif sys.platform.startswith('linux'):
     _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs/libopenctm.so')
 else:
     raise NotImplementedError(sys.platform)
