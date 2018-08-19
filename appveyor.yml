@@ -1,6 +1,6 @@
 environment:
   global:
-    TWINE_USERNAME=lejafar
+    TWINE_USERNAME: lejafar
 
 build_script:
   - bash travis/build-openctm-win.sh
