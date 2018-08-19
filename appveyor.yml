@@ -1,4 +1,11 @@
 environment:
+  matrix:
+    # VS 2015
+    - BUILD_TYPE: nmake
+      VS_VERSION: Visual Studio 14
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+
+environment:
   global:
     TWINE_USERNAME: lejafar
 
