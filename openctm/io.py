@@ -3,11 +3,15 @@ import numpy as np
 
 
 class CTM:
+    """
+    Object that encapsulates a CTM file
+    """
 
-    def __init__(self, _vertices, _faces, _normals=None):
+    def __init__(self, _vertices, _faces, _normals=None, _filename=""):
         self.vertices = _vertices
         self.faces = _faces
         self.normals = _normals
+        self.filename = _filename
 
     def __eq__(self, other):
         return (self.vertices == other.vertices).all() and (self.faces == other.faces).all()
@@ -51,6 +55,9 @@ def import_mesh(_filename):
 
 def export_mesh(_ctm, _filename):
     ctm_context = ctmNewContext(CTM_EXPORT)
+    
+    if not _filename.lower().endswith('.ctm'):
+		_filename += '.ctm'
 
     try:
         vertex_count = len(_ctm.vertices)
