@@ -57,7 +57,7 @@ def export_mesh(_ctm, _filename):
     ctm_context = ctmNewContext(CTM_EXPORT)
     
     if not _filename.lower().endswith('.ctm'):
-		_filename += '.ctm'
+        _filename += '.ctm'
 
     try:
         vertex_count = len(_ctm.vertices)
