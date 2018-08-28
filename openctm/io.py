@@ -7,11 +7,10 @@ class CTM:
     Object that encapsulates a CTM file
     """
 
-    def __init__(self, _vertices, _faces, _normals=None, _filename=""):
+    def __init__(self, _vertices, _faces, _normals=None):
         self.vertices = _vertices
         self.faces = _faces
         self.normals = _normals
-        self.filename = _filename
 
     def __eq__(self, other):
         return (self.vertices == other.vertices).all() and (self.faces == other.faces).all()
@@ -72,7 +71,7 @@ def export_mesh(_ctm, _filename):
         for i in range(face_count * 3):
             p_faces[i] = CTMuint(faces[i])
 
-        if _ctm.normals:
+        if _ctm.normals is not None:
             normal_count = len(_ctm.normals)
             normals = _ctm.normals.reshape((-1, 1))
             p_normals = ctypes.cast((CTMfloat * normal_count * 3)(), ctypes.POINTER(CTMfloat))
