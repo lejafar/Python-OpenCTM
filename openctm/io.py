@@ -19,7 +19,7 @@ class CTM:
 def import_mesh(_filename):
     ctm_context = ctmNewContext(CTM_IMPORT)
     try:
-        ctmLoad(ctm_context, str(_filename).encode('utf-8'))
+        ctmLoad(ctm_context, _encode(_filename))
         err = ctmGetError(ctm_context)
         if err != CTM_NONE:
             raise IOError("Error loading file: %s" % str(ctmErrorString(err)))
@@ -55,7 +55,7 @@ def import_mesh(_filename):
 def export_mesh(_ctm, _filename):
     ctm_context = ctmNewContext(CTM_EXPORT)
     
-    if not _filename.lower().endswith('.ctm'):
+    if not str(_filename).lower().endswith('.ctm'):
         _filename += '.ctm'
 
     try:
@@ -81,6 +81,21 @@ def export_mesh(_ctm, _filename):
             p_normals = None
 
         ctmDefineMesh(ctm_context, p_vertices, CTMuint(vertex_count), p_faces, CTMuint(face_count), p_normals)
-        ctmSave(ctm_context, ctypes.c_char_p(_filename.encode('utf-8')))
+        ctmSave(ctm_context, ctypes.c_char_p(_encode(_filename)))
     finally:
         ctmFreeContext(ctm_context)
+
+def _encode(_filename):
+    try:
+        return str(_filename).encode("utf-8")
+    except UnicodeEncodeError:
+        pass
+
+    try:
+        # works fine for pathlib.Path
+        return bytes(_filename)
+    except TypeError:
+        pass
+
+    return str(_filename).encode("utf-8", "surrogateescape")
+
