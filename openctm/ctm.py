@@ -77,7 +77,7 @@ def read_ctm(file_obj):
     if header.compression_method.decode('utf8') == "MG1":
         return read_ctm_MG1(file_obj, header)
 
-    if header.compression_method.decode('utf8') == "MH2":
+    if header.compression_method.decode('utf8') == "MG2":
         raise Exception("Not implemented yet!")
 
 def read_ctm_RAW(file_obj):
@@ -121,12 +121,12 @@ def read_packed_data(file_obj, element_count, dtype, stride=3):
     comp_filters = [{"id": lzma.FILTER_LZMA1, "dict_size": dict_size, "lc": lc, "lp": lp, "pb": pb}]
 
     # decompress
-    interleaved_indices = decompress_lzma(file_obj.read(packed_size), filters=comp_filters)
+    interleaved = decompress_lzma(file_obj.read(packed_size), filters=comp_filters)
     # create numpy array containing all separate bytes and undo byte level interleaving
-    interleaved_indices = np.frombuffer(interleaved_indices, dtype=np.dtype('b'), count=element_count * 3 * 4)
-    non_interleaved_indices = np.flip(interleaved_indices.reshape(4, stride,-1), 0).reshape(-1, order='F')
+    interleaved = np.frombuffer(interleaved, dtype=np.dtype('b'), count=element_count * 3 * 4)
+    non_interleaved = np.flip(interleaved.reshape(4, stride, -1), 0).reshape(-1, order='F')
 
-    return np.frombuffer(non_interleaved_indices.tobytes(), dtype=dtype, count=element_count * 3)
+    return np.frombuffer(non_interleaved.tobytes(), dtype=dtype, count=element_count * 3)
 
 #https://stackoverflow.com/a/37400585/8890398
 def decompress_lzma(data, filters=None):
