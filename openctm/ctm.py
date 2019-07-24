@@ -26,19 +26,17 @@ References:
   http://openctm.sourceforge.net/
 """
 
-
-import struct
-import numpy as np
-import lzma
-import box
-
-RAW=0x00574152
-MG1=0x0031474d
-MG2=0x0032474d
-
 NORMALS=0x00000001
 
-_ctm_header_type = np.dtype([('magic_identifier', np.dtype('S4')),
+import numpy as np
+from types import SimpleNamespace
+from collections import namedtuple
+
+from . import utils
+
+class CTM:
+
+    HEADER_TYPE = np.dtype([('magic_identifier', np.dtype('S4')),
                              ('file_format', np.dtype('<i4')),
                              ('compression_method', np.dtype('S4')),
                              ('vertex_count', np.dtype('<i4')),
@@ -47,125 +45,101 @@ _ctm_header_type = np.dtype([('magic_identifier', np.dtype('S4')),
                              ('attr_map_count', np.dtype('<i4')),
                              ('flags', np.dtype('<i4'))])
 
-def read_int_32(file_obj):
-    return struct.unpack('i', file_obj.read(4))[0]
+    def __init__(self, file_obj, opened, header, comment=""):
+        self.file_obj = file_obj
+        self.opened = opened
+        self.header = header
+        self.comment = comment
 
-def read_string(file_obj):
-    size = read_int_32(file_obj)
-    if size:
-    	return struct.unpack('s', file_obj.read(size))[0]
-    return ""
+        self._body, self._custom_attributes = None, None
 
-def read_int_32_array(file_obj, length):
-    return np.frombuffer(file_obj.read(4*length), dtype=np.int32, count=length)
+    @classmethod
+    def compression_class(cls, method):
+        """ in order to allow subclassing `CTM`, we create the inheritance dynamically """
+        return {b'MG1': type('CTM_MG1_', (CTM_MG1, cls), {}),
+                b'MG2': type('CTM_MG2_', (CTM_MG1, cls), {})}.get(method, CTM)
 
-def read_float_32_array(file_obj, length):
-    return np.frombuffer(file_obj.read(4*length), dtype=np.float32, count=length)
+    @classmethod
+    def load(cls, file_obj, **kwargs):
 
-def read_ctm_header(file_obj):
-    header = np.frombuffer(file_obj.read(_ctm_header_type.itemsize), dtype=_ctm_header_type)
-    header = box.Box({k: header[k][0] for k in header.dtype.names})
-    comment = read_string(file_obj)
-    return header, comment
-
-def read_ctm(file_obj):
-    header, comment  = read_ctm_header(file_obj)
-
-    if header.compression_method.decode('utf8') == "RAW":
-        raise Exception("Not implemented yet!")
-
-    if header.compression_method.decode('utf8') == "MG1":
-        return read_ctm_MG1(file_obj, header)
-
-    if header.compression_method.decode('utf8') == "MG2":
-        raise Exception("Not implemented yet!")
-
-def read_ctm_RAW(file_obj):
-    return None
-
-def read_ctm_MG1(file_obj, header):
-
-    # Indices
-    read_int_32(file_obj) # INDX
-    indices = read_packed_data(file_obj, header.face_count, np.dtype('<i'), stride=3)
-    indices = delta_decode(indices).reshape(-1,3)
-
-    # Vertices
-    read_int_32(file_obj) # VERT
-    vertices = read_packed_data(file_obj, header.vertex_count, np.dtype('<f'), stride=1).reshape(-1,3)
-
-    # Normals
-    normals = None
-    if header.flags & NORMALS:
-        read_int_32(file_obj) # NORM
-        normals = read_packed_data(file_obj, header.vertex_count, np.dtype('<f'), stride=3).reshape(-1,3)
-
-    return indices, vertices, normals
-
-def read_packed_data(file_obj, element_count, dtype, stride=3):
-
-    packed_size = read_int_32(file_obj)
-
-    # read LZMA properties
-    lzma_props = file_obj.read(5)
-
-    lzma_model_props = lzma_props[0]
-
-    lc = lzma_model_props % 9 # the number of "literal context" bits
-    lzma_model_props = (lzma_model_props - lc) // 9
-    lp = lzma_model_props % 5 # the number of "literal pos" bits
-    pb = (lzma_model_props - lp) // 5 # the number of "pos" bits
-
-    dict_size = struct.unpack('i', lzma_props[1:])[0]
-
-    comp_filters = [{"id": lzma.FILTER_LZMA1, "dict_size": dict_size, "lc": lc, "lp": lp, "pb": pb}]
-
-    # decompress
-    interleaved = decompress_lzma(file_obj.read(packed_size), filters=comp_filters)
-    # create numpy array containing all separate bytes and undo byte level interleaving
-    interleaved = np.frombuffer(interleaved, dtype=np.dtype('b'), count=element_count * 3 * 4)
-    non_interleaved = np.flip(interleaved.reshape(4, stride, -1), 0).reshape(-1, order='F')
-
-    return np.frombuffer(non_interleaved.tobytes(), dtype=dtype, count=element_count * 3)
-
-#https://stackoverflow.com/a/37400585/8890398
-def decompress_lzma(data, filters=None):
-    results = []
-
-    while True:
-        decomp = lzma.LZMADecompressor(format=lzma.FORMAT_RAW, memlimit=None, filters=filters)
         try:
-            res = decomp.decompress(data)
-        except lzma.LZMAError:
-            if results:
-                break  # Leftover data is not a valid LZMA/XZ stream
-            else:
-                raise  # Error on the first iteration
-        results.append(res)
-        data = decomp.unused_data
-        if not data:
-            break
-        if not decomp.eof:
-            raise lzma.LZMAError("Compressed data ended before the end-of-stream marker was reached")
-    return b"".join(results)
+            # try reading header
+            opened = False
+            header, comment = cls.read_header(file_obj)
+        except AttributeError as e:
+            file_obj = open(file_obj, 'rb')
+            opened = True # we'll also have to close it
+            header, comment = cls.read_header(file_obj)
 
-def delta_decode(data):
+        return cls.compression_class(header.compression_method)(file_obj, opened, header, comment, **kwargs)
 
-    # TODO: replace by numpy operations
-    decoded_data = np.copy(data)
-    if len(decoded_data) > 0:
-        decoded_data[2] += decoded_data[0]
-        decoded_data[1] += decoded_data[0]
+    @classmethod
+    def read_header(cls, f, **kwargs):
+        header = np.frombuffer(f.read(cls.HEADER_TYPE.itemsize), dtype=cls.HEADER_TYPE)
+        header = SimpleNamespace(**{k: header[k][0] for k in header.dtype.names})
+        comment = utils.read_string(f)
+        header.header_size = f.tell()
+        return header, comment
 
-    for i in range(3, len(decoded_data), 3):
-        decoded_data[i] += decoded_data[i - 3]
+    @property
+    def faces(self):
+        return self.body.indices
 
-        if decoded_data[i] == decoded_data[i - 3]:
-            decoded_data[i + 1] += decoded_data[i - 2]
-        else:
-            decoded_data[i + 1] += decoded_data[i]
+    @property
+    def vertices(self):
+        return self.body.vertices
 
-        decoded_data[i + 2] += decoded_data[i]
+    @property
+    def normals(self):
+        return self.body.normals
 
-    return decoded_data
+    @property
+    def body(self):
+
+        if self._body is not None:
+            return self._body
+
+        body = SimpleNamespace(indices=None, vertices=None, normals=None)
+        self._body = self.read_body(body, self.file_obj)
+        return self._body
+
+
+    def read_body(self, body, f):
+        raise NotImplementedError("not yet implemented")
+
+
+    def __del__(self):
+        if self.opened:
+            # we only want to close the file_obj
+            # if we are the ones that opened it
+            self.file_obj.close()
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}<n_vertices={self.header.vertex_count}, n_faces={self.header.face_count}>"
+
+class CTM_MG1:
+
+    def read_body(self, body, f):
+
+        # Indices
+        assert utils.read_string(f, 4) == 'INDX'
+        body.indices = utils.read_packed_data(self.file_obj, self.header.face_count, np.dtype('<i'), stride=3)
+        body.indices = utils.delta_decode(body.indices).reshape(-1, 3)
+
+        # Vertices
+        assert utils.read_string(f, 4) == 'VERT'
+        body.vertices = utils.read_packed_data(f, self.header.vertex_count, np.dtype('<f'), stride=1).reshape(-1, 3)
+
+        # Normals
+        if self.header.flags & NORMALS:
+            assert utils.read_string(f, 4) == 'NORM'
+            body.normals = utils.read_packed_data(f, self.header.vertex_count, np.dtype('<f'), stride=3).reshape(-1, 3)
+
+        return body
+
+class CTM_MG2:
+
+    def read_body(self, body, f):
+        raise NotImplementedError("Not yet implemented")
+
 
