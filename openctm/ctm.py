@@ -45,41 +45,51 @@ class CTM:
                              ('attr_map_count', np.dtype('<i4')),
                              ('flags', np.dtype('<i4'))])
 
-    def __init__(self, file_obj, opened, header, comment=""):
+    def __init__(self, file_obj):
         self.file_obj = file_obj
-        self.opened = opened
-        self.header = header
-        self.comment = comment
+        self.opened = False
 
-        self._body, self._custom_attributes = None, None
+        self._header = None
+        self._body = None
+        self.comment = None
 
-    @classmethod
-    def compression_class(cls, method):
-        """ in order to allow subclassing `CTM`, we create the inheritance dynamically """
-        return {b'MG1': type('CTM_MG1_', (CTM_MG1, cls), {}),
-                b'MG2': type('CTM_MG2_', (CTM_MG1, cls), {})}.get(method, CTM)
+    @property
+    def reader(self):
+        return {b'MG1': MG1,
+                b'MG2': MG2}.get(self.header.compression_method, RAW)
 
-    @classmethod
-    def load(cls, file_obj, **kwargs):
+    @property
+    def header(self):
+
+        if self._header is not None:
+            return self._header
 
         try:
             # try reading header
-            opened = False
-            header, comment = cls.read_header(file_obj)
+            self._header, self.comment = self.read_header(self.file_obj)
         except AttributeError as e:
-            file_obj = open(file_obj, 'rb')
-            opened = True # we'll also have to close it
-            header, comment = cls.read_header(file_obj)
+            self.file_obj = open(self.file_obj, 'rb')
+            self.opened = True # we'll also have to close it
+            self._header, self.comment = self.read_header(self.file_obj)
 
-        return cls.compression_class(header.compression_method)(file_obj, opened, header, comment, **kwargs)
+        return self._header
 
-    @classmethod
-    def read_header(cls, f, **kwargs):
-        header = np.frombuffer(f.read(cls.HEADER_TYPE.itemsize), dtype=cls.HEADER_TYPE)
+    def read_header(self, f, **kwargs):
+        header = np.frombuffer(f.read(self.HEADER_TYPE.itemsize), dtype=self.HEADER_TYPE)
         header = SimpleNamespace(**{k: header[k][0] for k in header.dtype.names})
         comment = utils.read_string(f)
         header.header_size = f.tell()
         return header, comment
+
+    @property
+    def body(self):
+
+        if self._body is not None:
+            return self._body
+
+        body = SimpleNamespace(indices=None, vertices=None, normals=None)
+        self._body = self.reader.read_body(body, self.header, self.file_obj)
+        return self._body
 
     @property
     def faces(self):
@@ -93,21 +103,6 @@ class CTM:
     def normals(self):
         return self.body.normals
 
-    @property
-    def body(self):
-
-        if self._body is not None:
-            return self._body
-
-        body = SimpleNamespace(indices=None, vertices=None, normals=None)
-        self._body = self.read_body(body, self.file_obj)
-        return self._body
-
-
-    def read_body(self, body, f):
-        raise NotImplementedError("not yet implemented")
-
-
     def __del__(self):
         if self.opened:
             # we only want to close the file_obj
@@ -117,29 +112,37 @@ class CTM:
     def __repr__(self):
         return f"{self.__class__.__name__}<n_vertices={self.header.vertex_count}, n_faces={self.header.face_count}>"
 
-class CTM_MG1:
+class RAW:
 
-    def read_body(self, body, f):
+    @staticmethod
+    def read_body(body, header, f):
+        raise NotImplementedError("Not yet implemented")
+
+class MG1(RAW):
+
+    @staticmethod
+    def read_body(body, header, f):
 
         # Indices
         assert utils.read_string(f, 4) == 'INDX'
-        body.indices = utils.read_packed_data(self.file_obj, self.header.face_count, np.dtype('<i'), stride=3)
+        body.indices = utils.read_packed_data(f, header.face_count, np.dtype('<i'), stride=3)
         body.indices = utils.delta_decode(body.indices).reshape(-1, 3)
 
         # Vertices
         assert utils.read_string(f, 4) == 'VERT'
-        body.vertices = utils.read_packed_data(f, self.header.vertex_count, np.dtype('<f'), stride=1).reshape(-1, 3)
+        body.vertices = utils.read_packed_data(f, header.vertex_count, np.dtype('<f'), stride=1).reshape(-1, 3)
 
         # Normals
-        if self.header.flags & NORMALS:
+        if header.flags & NORMALS:
             assert utils.read_string(f, 4) == 'NORM'
-            body.normals = utils.read_packed_data(f, self.header.vertex_count, np.dtype('<f'), stride=3).reshape(-1, 3)
+            body.normals = utils.read_packed_data(f, header.vertex_count, np.dtype('<f'), stride=3).reshape(-1, 3)
 
         return body
 
-class CTM_MG2:
+class MG2(RAW):
 
-    def read_body(self, body, f):
+    @staticmethod
+    def read_body(body, header, f):
         raise NotImplementedError("Not yet implemented")
 
 
