@@ -1,4 +1,4 @@
-Python-OpenCTM
+Python-OpenCTM (nightly)
 ==============
 [![Build Status](https://travis-ci.org/lejafar/Python-OpenCTM.svg?branch=master)](https://travis-ci.org/lejafar/Python-OpenCTM) [![PyPI version](https://badge.fury.io/py/python-openctm.svg)](https://badge.fury.io/py/python-openctm)
 ### Python Interface for the Open-CTM File Format
@@ -8,7 +8,7 @@ Python-OpenCTM is a Python interface for the [OpenCTM](https://github.com/Danny0
 ## Installation
 
 ```shell
-pip install python-openctm
+pip install python-openctm-nightly
 ```
 
 ## Usage

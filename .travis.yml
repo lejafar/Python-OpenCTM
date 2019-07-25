@@ -1,41 +1,16 @@
 language: python
 
-matrix:
-  include:
-    - sudo: required
-      services:
-        - docker
-      env:
-        - PIP=pip
-        - MAKEFILE=Makefile.linux
-        - LIB_NAME=libopenctm.so
-    - os: osx
-      language: generic
-      env:
-        - PIP=pip2
-        - MAKEFILE=Makefile.macosx
-        - LIB_NAME=libopenctm.dylib
+python:
+    - "2.7"
+    - "3.5"
+    - "3.6"
+    - "3.7"
 
 env:
   global:
     - TWINE_USERNAME=lejafar
 
-install:
-  - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      bash travis/build-openctm.sh $MAKEFILE $LIB_NAME
-      $PIP install pyOpenSSL ndg-httpsclient pyasn1
-    else
-      docker run -v $PWD/openctm:/openctm -v $PWD/travis:/travis quay.io/pypa/manylinux1_x86_64 bash /travis/build-openctm.sh $MAKEFILE $LIB_NAME
-    fi
-
-before_script:
-  - $PIP install numpy
-  - python -m unittest discover -s tests/  -vvv
-
 script:
-  - $PIP install cibuildwheel==0.9.4
-  - touch stub.cc
-  - cibuildwheel --output-dir wheelhouse
+  - python setup.py sdist bdist_wheel
   - python -m pip install twine
-  - python -m twine upload wheelhouse/*.whl
+  - python -m twine upload dist/*

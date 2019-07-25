@@ -9,21 +9,16 @@ if os.path.exists('README.md'):
         long_description = f.read()
 
 setup(
-    name='python-openctm',
+    name='python-openctm-nightly',
     version=__version__,
-    description='Python Interface for the OpenCTM File Format',
+    description='Python Interface for the OpenCTM File Format (nightly)',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/lejafar/python-openctm',
     author='Rafael Hautekiet',
     author_email='rafaelhautekiet@gmail.com',
     license='zlib License',
-    ext_modules=[Extension('_foo', ['stub.cc'])],
     packages=['openctm'],
-    package_data={
-        'openctm': ['libs/libopenctm.dylib',
-                    'libs/libopenctm.so'],
-    },
     install_requires=[
           'numpy>=1.14.2',
       ],

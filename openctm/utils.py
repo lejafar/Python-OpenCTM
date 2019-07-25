@@ -18,18 +18,6 @@ def read_string(file_obj, size=None):
 def read_char(file_obj):
     return struct.unpack('s', file_obj.read(1))[0]
 
-def read_attribute_names(file_obj, number_of_attributes, delimiter='\x07', xor_encryption_key=b'\xf0'):
-    current_char = b'\x00'
-    for _ in range(number_of_attributes):
-        current_string = ""
-        while True:
-            current_char = chr(ord(read_char(file_obj)) ^ ord(xor_encryption_key))
-            if current_char != delimiter:
-                current_string += current_char
-            else:
-                break
-        yield current_string
-
 def read_int_32_array(file_obj, length):
     return np.frombuffer(file_obj.read(4*length), dtype=np.int32, count=length)
 
