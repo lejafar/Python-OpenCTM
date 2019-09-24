@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 import os
 
 exec(open('openctm/version.py').read())
@@ -18,7 +18,7 @@ setup(
     author='Rafael Hautekiet',
     author_email='rafaelhautekiet@gmail.com',
     license='zlib License',
-    packages=['openctm'],
+    packages=find_packages(),
     install_requires=[
           'numpy>=1.14.2',
       ],

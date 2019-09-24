@@ -9,14 +9,23 @@ def read_uint_16(file_obj):
 def read_int_32(file_obj):
     return struct.unpack('i', file_obj.read(4))[0]
 
+def write_int_32(file_obj, integer):
+    file_obj.write(struct.pack('s', integer))
+
 def read_string(file_obj, size=None):
     size = size or read_int_32(file_obj)
     if size:
         return "".join([chr(ord(read_char(file_obj))) for _ in range(size)])
     return ""
 
+def write_string(file_obj, string):
+    file_obj.write(struct.pack("{0}s".format(len(string)), str.encode(string)))
+
 def read_char(file_obj):
     return struct.unpack('s', file_obj.read(1))[0]
+
+def write_char(file_obj, char):
+    file_obj.write(struct.pack('s', bytes(char)))
 
 def read_int_32_array(file_obj, length):
     return np.frombuffer(file_obj.read(4*length), dtype=np.int32, count=length)
@@ -50,6 +59,24 @@ def read_packed_data(file_obj, element_count, dtype, stride=3):
 
     return np.frombuffer(non_interleaved.tobytes(), dtype=dtype, count=element_count * 3)
 
+def write_packed_data(file_obj, data, stride=3):
+
+    lc = 3
+    lp = 0
+    pb = 2
+
+    dict_size = 65536
+
+    comp_filters = [{"id": lzma.FILTER_LZMA1, "dict_size": dict_size, "lc": lc, "lp": lp, "pb": pb}]
+    # create numpy array containing all separate bytes and apply byte interleaving
+    non_interleaved = np.frombuffer(data, dtype=np.dtype('b'), count=len(data) * 4)
+    interleaved = np.flip(non_interleaved.reshape(-1, stride, 4), 0).reshape(-1, order='F')
+
+    compressed_data = compress_lzma(interleaved, filters=comp_filters)
+    packed_size = write_int_32(file_obj, len(compressed_data))
+
+    # to be continued ...
+
 def read_packed_data_zlib(file_obj, packed_size, dtype, element_count):
     decompressed = zlib.decompress(file_obj.read(packed_size))
     return np.frombuffer(decompressed, dtype=dtype, count=element_count)
@@ -75,6 +102,14 @@ def decompress_lzma(data, filters=None):
             raise lzma.LZMAError("Compressed data ended before the end-of-stream marker was reached")
     return b"".join(results)
 
+def compress_lzma(data, filters=None):
+    results = []
+
+    while True:
+        comp = lzma.LZMACompressor(format=lzma.FORMAT_RAW, filters=filters)
+        breakpoint()
+    return b"".join(results)
+
 def delta_decode(data):
 
     # TODO: replace by numpy operations
@@ -94,4 +129,23 @@ def delta_decode(data):
         decoded_data[i + 2] += decoded_data[i]
 
     return decoded_data
+
+def delta_encode(data):
+
+    encoded_data = np.copy(data)
+    if len(encoded_data) > 0:
+        encoded_data[1] -= data[0]
+        encoded_data[2] -= data[0]
+
+    for i in range(3, len(encoded_data), 3):
+        encoded_data[i] -= data[i - 3]
+
+        if data[i] == data[i - 3]:
+            encoded_data[i + 1] -= data[i - 2]
+        else:
+            encoded_data[i + 1] -= data[i]
+
+        encoded_data[i + 2] -= data[i]
+
+    return encoded_data
 
