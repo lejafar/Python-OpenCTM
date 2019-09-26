@@ -86,7 +86,10 @@ class CTM:
         return cls(**mesh_dict, header=header)
 
     def export(self, file_obj):
-        self.WRITER(file_obj, self._mesh_dict, self.header)
+        # enforce RAW temporarily
+        header = self.header
+        header.compression_method = 'RAW'
+        self.WRITER(file_obj, self._mesh_dict, header)
 
     def __repr__(self):
         return f"{self.__class__.__name__}<n_vertices={self.header.vertex_count}, n_faces={self.header.face_count}>"

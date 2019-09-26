@@ -6,6 +6,9 @@ import zlib
 def read_uint_16(file_obj):
     return struct.unpack('H', file_obj.read(2))[0]
 
+def write_uint_16(file_obj, integer):
+    file_obj.write(struct.pack('H', integer))
+
 def read_int_32(file_obj):
     return struct.unpack('i', file_obj.read(4))[0]
 
@@ -25,7 +28,7 @@ def read_char(file_obj):
     return struct.unpack('s', file_obj.read(1))[0]
 
 def write_char(file_obj, char):
-    file_obj.write(struct.pack('s', bytes(char)))
+    file_obj.write(struct.pack('s', char))
 
 def read_int_32_array(file_obj, length):
     return np.frombuffer(file_obj.read(4*length), dtype=np.int32, count=length)
@@ -86,6 +89,13 @@ def write_packed_data(file_obj, data, stride=3):
 def read_packed_data_zlib(file_obj, packed_size, dtype, element_count):
     decompressed = zlib.decompress(file_obj.read(packed_size))
     return np.frombuffer(decompressed, dtype=dtype, count=element_count)
+
+def write_packed_data_zlib(file_obj, data):
+    compressed = zlib.compress(data.tobytes())
+    # write packed data length
+    write_int_32(file_obj, len(compressed))
+    # write packed data
+    file_obj.write(compressed)
 
 #https://stackoverflow.com/a/37400585/8890398
 def decompress_lzma(data, filters=None):

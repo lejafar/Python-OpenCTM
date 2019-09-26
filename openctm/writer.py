@@ -47,4 +47,4 @@ class CTMWriter:
         transcoder = {b'MG1': compression.MG1,
                       b'MG2': compression.MG2}.get(header.compression_method, compression.RAW)
 
-        transcoder.encode_body(file_obj, mesh_dict, header)
+        compression.RAW.encode_body(file_obj, mesh_dict, header)
