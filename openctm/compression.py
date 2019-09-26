@@ -26,20 +26,20 @@ class RAW:
         return vertices, faces, face_normals
 
     @staticmethod
-    def encode_body(f, mesh):
+    def encode_body(f, mesh_dict, header):
 
         # Faces
         utils.write_string(f, 'INDX')
-        utils.write_int_32_array(f, mesh.faces.reshape(-1))
+        utils.write_int_32_array(f, mesh_dict['faces'].reshape(-1))
 
         # Vertices
         utils.write_string(f, 'VERT')
-        utils.write_float_32_array(f, mesh.vertices.reshape(-1))
+        utils.write_float_32_array(f, mesh_dict['vertices'].reshape(-1))
 
         # Normals
-        if (mesh.header.flags & NORMALS) and mesh.face_normals is not None:
+        if (header.flags & NORMALS) and mesh_dict['face_normals'] is not None:
             utils.write_string(f, 'NORM')
-            utils.write_float_32_array(f, mesh.face_normals.reshape(-1))
+            utils.write_float_32_array(f, mesh_dict['face_normals'].reshape(-1))
 
 class MG1(RAW):
 
@@ -64,7 +64,7 @@ class MG1(RAW):
         return vertices, faces, face_normals
 
     @staticmethod
-    def encode_body(f, mesh):
+    def encode_body(f, mesh_dict, header):
 
         # Indices
         utils.write_string(f, 'INDX')

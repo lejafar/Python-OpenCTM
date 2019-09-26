@@ -61,18 +61,18 @@ class CTM:
         return self._header
 
     @property
-    def mesh(self):
+    def mesh_dict(self):
         return {"vertices": self.vertices,
                 "faces": self.faces,
                 "face_normals": self.face_normals}
 
     @classmethod
     def load(cls, file_obj):
-        mesh, header = cls.READER(file_obj)
-        return cls(**mesh, header=header)
+        mesh_dict, header = cls.READER(file_obj)
+        return cls(**mesh_dict, header=header)
 
     def export(self, file_obj):
-        self.WRITER(file_obj, self)
+        self.WRITER(file_obj, self.mesh_dict, self.header)
 
     def __repr__(self):
         return f"{self.__class__.__name__}<n_vertices={self.header.vertex_count}, n_faces={self.header.face_count}>"
