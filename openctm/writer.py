@@ -2,10 +2,23 @@ import numpy as np
 
 from . import utils
 from . import compression
+from .header import CTMHeader
 
 class CTMWriter:
 
-    def __new__(cls, file_obj, mesh_dict, header):
+    @classmethod
+    def make_header(cls, mesh_dict):
+        """ make header when none is available """
+        header = CTMHeader()
+        header.vertex_count = len(mesh_dict['vertices'])
+        header.face_count = len(mesh_dict['faces'])
+        # TODO: set normals flag
+        return header
+
+    def __new__(cls, file_obj, mesh_dict, header=None, **header_options):
+        if header is None:
+            header = cls.make_header(mesh_dict)
+            header.update_header_properties(**header_options)
         try:
             # try to write to it
             return cls.write(file_obj, mesh_dict, header)

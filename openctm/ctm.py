@@ -25,7 +25,6 @@ References:
 - "OpenCTM: The Open Compressed Triangle Mesh file format" by Marcus Geelnard
   http://openctm.sourceforge.net/
 """
-
 from .reader import CTMReader, CTMHeader
 from .writer import CTMWriter
 
@@ -39,11 +38,36 @@ class CTM:
     DEFAULT_COMPRESSION = 'RAW'
 
     def __init__(self, vertices, faces, face_normals=None, header=None):
+        self._mesh_dict = {}
+        self._header = header
+
         self.vertices = vertices
         self.faces = faces
         self.face_normals = face_normals
 
-        self._header = header
+    @property
+    def vertices(self):
+        return self._mesh_dict.get('vertices')
+
+    @vertices.setter
+    def vertices(self, value):
+        self._mesh_dict['vertices'] = value
+
+    @property
+    def faces(self):
+        return self._mesh_dict.get('faces')
+
+    @faces.setter
+    def faces(self, value):
+        self._mesh_dict['faces'] = value
+
+    @property
+    def face_normals(self):
+        return self._mesh_dict.get('face_normals')
+
+    @face_normals.setter
+    def face_normals(self, value):
+        self._mesh_dict['face_normals'] = value
 
     @property
     def comment(self):
@@ -60,19 +84,13 @@ class CTM:
 
         return self._header
 
-    @property
-    def mesh_dict(self):
-        return {"vertices": self.vertices,
-                "faces": self.faces,
-                "face_normals": self.face_normals}
-
     @classmethod
     def load(cls, file_obj):
         mesh_dict, header = cls.READER(file_obj)
         return cls(**mesh_dict, header=header)
 
     def export(self, file_obj):
-        self.WRITER(file_obj, self.mesh_dict, self.header)
+        self.WRITER(file_obj, self._mesh_dict, self.header)
 
     def __repr__(self):
         return f"{self.__class__.__name__}<n_vertices={self.header.vertex_count}, n_faces={self.header.face_count}>"
