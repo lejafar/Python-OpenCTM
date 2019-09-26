@@ -15,12 +15,8 @@ class CTMHeader:
 
     DEFAULTS = (b'OCTM', 5, b'RAW', 0, 0, 0, 0, 0)
 
-    def __init__(self, header=None, comment=None, header_size=None, **header_options):
-
+    def __init__(self, header=None, **header_options):
         self.header = header or np.array([self.DEFAULTS], dtype=self.HEADER_TYPE)
-        self.comment = comment
-        self.header_size = header_size
-
         self.update_header_properties(**header_options)
 
     def __array__(self):
@@ -28,11 +24,8 @@ class CTMHeader:
 
     @classmethod
     def load(cls, file_obj):
-        file_obj.seek(0) # make sure we are at start of file
         header = np.copy(np.frombuffer(file_obj.read(cls.HEADER_TYPE.itemsize), dtype=cls.HEADER_TYPE))
-        comment = utils.read_string(file_obj) # TODO: test this more
-        header_size = file_obj.tell()
-        return cls(header, comment, header_size)
+        return cls(header)
 
     @property
     def header_property_names(self):

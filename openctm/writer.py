@@ -6,6 +6,8 @@ from .header import CTMHeader
 
 class CTMWriter:
 
+    """ singleton class responsible for writing """
+
     @classmethod
     def make_header(cls, mesh_dict):
         """ make header when none is available """

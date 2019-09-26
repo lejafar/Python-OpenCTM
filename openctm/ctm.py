@@ -70,10 +70,6 @@ class CTM:
         self._mesh_dict['face_normals'] = value
 
     @property
-    def comment(self):
-        return self.header.comment
-
-    @property
     def header(self):
         if not self._header:
             self._header = CTMHeader(compression_method=self.DEFAULT_COMPRESSION)
