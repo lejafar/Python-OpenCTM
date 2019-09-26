@@ -13,27 +13,48 @@ class CTMHeader:
         ('attr_map_count', np.dtype('<i4')),
         ('flags', np.dtype('<i4'))])
 
-    def __init__(self, header=None, comment=None, header_size=None):
-        self.header = header
+    DEFAULTS = (b'OCTM', 5, b'RAW', 0, 0, 0, 0, 0)
+
+    def __init__(self, header=None, comment=None, header_size=None, **header_options):
+
+        self.header = header or np.array([self.DEFAULTS], dtype=self.HEADER_TYPE)
         self.comment = comment
         self.header_size = header_size
+
+        self.update_header_properties(**header_options)
 
     def __array__(self):
         return self.header
 
     @classmethod
     def load(cls, file_obj):
-        header = np.frombuffer(file_obj.read(cls.HEADER_TYPE.itemsize), dtype=cls.HEADER_TYPE)
+        file_obj.seek(0) # make sure we are at start of file
+        header = np.copy(np.frombuffer(file_obj.read(cls.HEADER_TYPE.itemsize), dtype=cls.HEADER_TYPE))
         comment = utils.read_string(file_obj) # TODO: test this more
         header_size = file_obj.tell()
         return cls(header, comment, header_size)
 
     @property
+    def header_property_names(self):
+        return {name for name in self.HEADER_TYPE.names}
+
+    @property
     def header_properties(self):
-        return {k:v for k, v in zip(self.header.dtype.names, self.header[0])}
+        return {name:value for name, value in zip(self.HEADER_TYPE.names, self.header[0])}
+
+    def update_header_properties(self, **updates):
+        updated_header_properties = {**self.header_properties, **updates}
+        self.header[0] = tuple(str.encode(v) if isinstance(v, str) else v for v in updated_header_properties.values())
 
     def __getattr__(self, name):
-        if name in self.header_properties:
+        if name in self.header_property_names:
             return self.header_properties[name]
         else:
             raise AttributeError(f"{self} has no attribute {name}")
+
+    def __setattr__(self, name, value):
+        if name in self.header_property_names:
+            self.update_header_properties(**{name:value})
+        else:
+            super().__setattr__(name, value)
+

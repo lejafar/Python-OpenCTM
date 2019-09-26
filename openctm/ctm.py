@@ -36,7 +36,7 @@ class CTM:
 
     READER = CTMReader
     WRITER = CTMWriter
-    DEFAULT_COMPRESSION = 'MG1'
+    DEFAULT_COMPRESSION = 'RAW'
 
     def __init__(self, vertices, faces, face_normals=None, header=None):
         self.vertices = vertices
@@ -53,6 +53,11 @@ class CTM:
     def header(self):
         if not self._header:
             self._header = CTMHeader(compression_method=self.DEFAULT_COMPRESSION)
+
+        # enforce the header to be always consistent with the content
+        self._header.vertex_count = len(self.vertices)
+        self._header.face_count = len(self.faces)
+
         return self._header
 
     @property

@@ -18,22 +18,22 @@ class CTMReader:
     @classmethod
     def read(cls, file_obj):
         # read ctm file
-        header = cls.header(file_obj)
-        vertices, faces, face_normals = cls.body(file_obj, header)
-        return {"vertices": vertices,
-                "faces": faces,
-                "face_normals": face_normals}, header
+        header = cls.read_header(file_obj)
+        body = cls.read_body(file_obj, header)
+        return body, header
 
     @classmethod
-    def header(cls, file_obj, **kwargs):
+    def read_header(cls, file_obj, **kwargs):
         """ read header """
         return CTMHeader.load(file_obj)
 
     @classmethod
-    def body(cls, file_obj, header):
+    def read_body(cls, file_obj, header):
         """ read body """
 
         transcoder = {b'MG1': MG1,
                       b'MG2': MG2}.get(header.compression_method, RAW)
 
-        return transcoder.decode_body(file_obj, header)
+        vertices, faces, face_normals = transcoder.decode_body(file_obj, header)
+        return {"vertices": vertices, "faces": faces, "face_normals": face_normals}
+

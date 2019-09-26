@@ -10,7 +10,7 @@ def read_int_32(file_obj):
     return struct.unpack('i', file_obj.read(4))[0]
 
 def write_int_32(file_obj, integer):
-    file_obj.write(struct.pack('s', integer))
+    file_obj.write(struct.pack('i', integer))
 
 def read_string(file_obj, size=None):
     size = size or read_int_32(file_obj)
@@ -30,8 +30,14 @@ def write_char(file_obj, char):
 def read_int_32_array(file_obj, length):
     return np.frombuffer(file_obj.read(4*length), dtype=np.int32, count=length)
 
+def write_int_32_array(file_obj, array):
+    file_obj.write(array.astype(np.int32).tobytes())
+
 def read_float_32_array(file_obj, length):
     return np.frombuffer(file_obj.read(4*length), dtype=np.float32, count=length)
+
+def write_float_32_array(file_obj, array):
+    file_obj.write(array.astype(np.float32).tobytes())
 
 def read_packed_data(file_obj, element_count, dtype, stride=3):
 
@@ -107,7 +113,7 @@ def compress_lzma(data, filters=None):
 
     while True:
         comp = lzma.LZMACompressor(format=lzma.FORMAT_RAW, filters=filters)
-        breakpoint()
+        break
     return b"".join(results)
 
 def delta_decode(data):

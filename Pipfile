@@ -8,6 +8,7 @@ numpy = "*"
 pytest = "*"
 
 [dev-packages]
+trimesh = "*"
 
 [requires]
 python_version = "3.7"
