@@ -14,10 +14,10 @@ pip install python-openctm-nightly
 ## Usage
 
 ```python
-from openctm import CTM
+import openctm
 
 # read
-mesh = CTM.load('box.ctm')
+mesh = openctm.load('box.ctm')
 
 print(mesh.vertices.shape)
 # (12, 3)
