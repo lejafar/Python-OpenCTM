@@ -12,6 +12,9 @@ def write_uint_16(file_obj, integer):
 def read_int_32(file_obj):
     return struct.unpack('i', file_obj.read(4))[0]
 
+def read_uint_32(file_obj):
+    return struct.unpack('I', file_obj.read(4))[0]
+
 def write_int_32(file_obj, integer):
     file_obj.write(struct.pack('i', integer))
 
@@ -88,10 +91,10 @@ def write_packed_data(file_obj, data, stride=3):
 
 def read_packed_data_zlib(file_obj, packed_size, dtype, element_count):
     decompressed = zlib.decompress(file_obj.read(packed_size))
-    return np.frombuffer(decompressed, dtype=dtype, count=element_count)
+    return np.copy(np.frombuffer(decompressed, dtype=dtype, count=element_count))
 
 def write_packed_data_zlib(file_obj, data):
-    compressed = zlib.compress(data.tobytes())
+    compressed = zlib.compress(data.tobytes(), level=zlib.Z_BEST_COMPRESSION)
     # write packed data length
     write_int_32(file_obj, len(compressed))
     # write packed data
