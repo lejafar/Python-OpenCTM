@@ -54,7 +54,7 @@ class MakeBuild(build_ext):
         lib_folder = project_folder / 'openctm/libs'
         lib_folder.mkdir(exist_ok=True)
         for shared_object in (source_folder / 'lib').glob('*openctm.*'):
-            shutil.copyfile(shared_object, lib_folder / shared_object.name)
+            shutil.copyfile(str(shared_object), str(lib_folder / shared_object.name))
 
 
 setup(name='python-openctm',
