@@ -1,5 +1,5 @@
 import os
-import glob
+import pathlib
 import platform
 import re
 import shutil
@@ -30,8 +30,8 @@ class MakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
-        project_folder = os.path.dirname(self.get_ext_fullpath(ext.name))
-        source_folder = ext.sourcedir
+        project_folder = pathlib.Path(self.get_ext_fullpath(ext.name)).parent
+        source_folder = pathlib.Path(ext.sourcedir)
 
         # pick make based on os
         makename = "make"
@@ -47,18 +47,14 @@ class MakeBuild(build_ext):
         makefile_args = ['-f', makefilename]
 
         # call make cmd
-        make_args = ['-C', source_folder] + makefile_args
+        make_args = ['-C', str(source_folder)] + makefile_args
         subprocess.check_call([makename] + make_args + ['openctm'], cwd=source_folder)
 
         # copy shared object to where it will be expected
-        lib_folder = os.path.join(project_folder, 'openctm', 'libs')
-        if not os.path.exists(lib_folder):
-            os.mkdir(lib_folder)
-
-        for shared_object in glob.glob(str(os.path.join(source_folder, 'lib', 'libopenctm.*'))):
-            shutil.copyfile(shared_object, os.path.join(lib_folder, os.path.basename(shared_object)))
-        for shared_object in glob.glob(str(os.path.join(source_folder, 'lib', '*.dll'))):
-            shutil.copyfile(shared_object, os.path.join(lib_folder, os.path.basename(shared_object)))
+        lib_folder = project_folder / 'openctm/libs'
+        lib_folder.mkdir(exist_ok=True)
+        for shared_object in (source_folder / 'lib').glob('*openctm.*'):
+            shutil.copyfile(shared_object, lib_folder / shared_object.name)
 
 
 setup(name='python-openctm',
@@ -77,6 +73,7 @@ setup(name='python-openctm',
       package_data={'openctm': ['libs/*']},
       install_requires=['numpy'],
       classifiers=[
+          "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6",
           "Programming Language :: Python :: 3.7",
