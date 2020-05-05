@@ -1,31 +1,34 @@
-import unittest
-import os
+import pathlib
+import numpy as np
+import trimesh
+import pytest
+import tempfile
 
-from openctm import import_mesh, export_mesh
-
-
-class BasicTestSuiteFunctions(unittest.TestCase):
-
-    def setUp(self):
-        self.file_dir = "tests/test-data/"
-
-    def testImportVertices(self):
-        mesh = import_mesh("%s/squares.ctm" % self.file_dir)
-        assert len(mesh.vertices) == 124
-
-    def testImportFaces(self):
-        mesh = import_mesh("%s/squares.ctm" % self.file_dir)
-        assert len(mesh.faces) == 284
-
-    def testExportImport(self):
-        original_mesh = import_mesh("%s/squares.ctm" % self.file_dir)
-        export_mesh(original_mesh, "%s/squares_exported.ctm" % self.file_dir)
-
-        exported_mesh = import_mesh("%s/squares_exported.ctm" % self.file_dir)
-
-        assert original_mesh == exported_mesh
-        os.remove("%s/squares_exported.ctm" % self.file_dir)
+from openctm import CTM, import_mesh, export_mesh
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture
+def data_path():
+    return pathlib.Path(__file__).parent / 'test-data'
+
+
+@pytest.fixture
+def tmp():
+    with tempfile.TemporaryDirectory() as tmp:
+        yield pathlib.Path(tmp)
+
+
+def test_round_trip(data_path, tmp):
+    box_path = data_path / 'box.stl'
+    org_mesh = trimesh.load(str(box_path))
+
+    # export org_mesh to ctm
+    ctm = CTM(org_mesh.vertices, org_mesh.faces, org_mesh.face_normals)
+    box_path_ctm = tmp / box_path.with_suffix('.ctm').name
+    export_mesh(ctm, box_path_ctm)
+
+    # import ctm to mesh
+    mesh = import_mesh(box_path_ctm)
+    assert mesh.vertices.shape == org_mesh.vertices.shape
+    assert mesh.faces.shape == org_mesh.faces.shape
+    assert mesh.normals.shape == org_mesh.face_normals.shape
