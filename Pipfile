@@ -7,6 +7,7 @@ name = "pypi"
 openctm = { path="." }
 trimesh = "*"
 pytest = "*"
+importlib-metadata = { version= ">=0.12", markers = "python_version < '3.8'"}
 
 [requires]
 python_version = "3"
