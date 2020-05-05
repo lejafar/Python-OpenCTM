@@ -102,6 +102,9 @@ elif sys.platform.startswith('linux'):
 elif sys.platform.startswith('win32'):
     _ctm_lib_path = os.path.join(os.path.dirname(__file__),
                                  'libs/libopenctm.dll')
+    import glob
+    for path in glob.glob(str(os.path.join(os.path.dirname(__file__))) + '/libs/*'):
+        print(path)
 else:
     raise NotImplementedError(sys.platform)
 
