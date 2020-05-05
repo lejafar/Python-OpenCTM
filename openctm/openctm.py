@@ -99,6 +99,9 @@ if sys.platform == 'darwin':
 elif sys.platform.startswith('linux'):
     _ctm_lib_path = os.path.join(os.path.dirname(__file__),
                                  'libs/libopenctm.so')
+elif sys.platform.startswith('win32'):
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
+                                 'libs/libopenctm.dll')
 else:
     raise NotImplementedError(sys.platform)
 
