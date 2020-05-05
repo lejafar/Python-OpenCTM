@@ -94,9 +94,11 @@ CTM_ATTRIB_MAP_8 = 0x0807
 
 # depending on os chose you binary ...
 if sys.platform == 'darwin':
-    _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs/libopenctm.dylib')
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
+                                 'libs/libopenctm.dylib')
 elif sys.platform.startswith('linux'):
-    _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs/libopenctm.so')
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
+                                 'libs/libopenctm.so')
 else:
     raise NotImplementedError(sys.platform)
 
@@ -187,14 +189,24 @@ ctmFileComment = _ctm_lib.ctmFileComment
 ctmFileComment.argtypes = [CTMcontext, ctypes.c_char_p]
 
 ctmDefineMesh = _ctm_lib.ctmDefineMesh
-ctmDefineMesh.argtypes = [CTMcontext, ctypes.POINTER(CTMfloat), CTMuint, ctypes.POINTER(CTMuint), CTMuint, ctypes.POINTER(CTMfloat)]
+ctmDefineMesh.argtypes = [
+    CTMcontext,
+    ctypes.POINTER(CTMfloat), CTMuint,
+    ctypes.POINTER(CTMuint), CTMuint,
+    ctypes.POINTER(CTMfloat)
+]
 
 ctmAddUVMap = _ctm_lib.ctmAddUVMap
-ctmAddUVMap.argtypes = [CTMcontext, ctypes.POINTER(CTMfloat), ctypes.c_char_p, ctypes.c_char_p]
+ctmAddUVMap.argtypes = [
+    CTMcontext,
+    ctypes.POINTER(CTMfloat), ctypes.c_char_p, ctypes.c_char_p
+]
 ctmAddUVMap.restype = CTMenum
 
 ctmAddAttribMap = _ctm_lib.ctmAddAttribMap
-ctmAddAttribMap.argtypes = [CTMcontext, ctypes.POINTER(CTMfloat), ctypes.c_char_p]
+ctmAddAttribMap.argtypes = [
+    CTMcontext, ctypes.POINTER(CTMfloat), ctypes.c_char_p
+]
 ctmAddAttribMap.restype = CTMenum
 
 ctmLoad = _ctm_lib.ctmLoad

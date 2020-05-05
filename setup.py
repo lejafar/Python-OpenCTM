@@ -31,7 +31,6 @@ class MakeBuild(build_ext):
 
     def build_extension(self, ext):
         project_folder = pathlib.Path(self.get_ext_fullpath(ext.name)).parent
-        project_folder.mkdir(parents=True, exist_ok=True)
         source_folder = pathlib.Path(ext.sourcedir)
 
         # pick make based on os
@@ -49,14 +48,17 @@ class MakeBuild(build_ext):
 
         # call make cmd
         make_args = ['-C', str(source_folder), *makefile_args]
-        subprocess.check_call([makename] + make_args, cwd=source_folder)
+        subprocess.check_call([makename] + make_args + ['openctm'], cwd=source_folder)
 
         shared_object, = (source_folder / 'lib').glob(f'libopenctm.*')
-        for path in source_folder.glob('**/*'):
-            print(path)
+        print(shared_object, '!!!!!')
+        #for path in source_folder.glob('**/*'):
+            #print(path)
 
         # copy shared object to where it will be expected
-        shutil.copy(shared_object, project_folder / 'libs')
+        lib_folder = project_folder / 'openctm/libs'
+        lib_folder.mkdir(exist_ok=True)
+        shutil.copyfile(shared_object, lib_folder / shared_object.name)
 
 
 setup(name='python-openctm',

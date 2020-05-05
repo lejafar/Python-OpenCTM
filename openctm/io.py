@@ -6,14 +6,14 @@ class CTM:
     """
     Object that encapsulates a CTM file
     """
-
     def __init__(self, _vertices, _faces, _normals=None):
         self.vertices = _vertices
         self.faces = _faces
         self.normals = _normals
 
     def __eq__(self, other):
-        return (self.vertices == other.vertices).all() and (self.faces == other.faces).all()
+        return (self.vertices == other.vertices).all() and (
+            self.faces == other.faces).all()
 
 
 def import_mesh(_filename):
@@ -35,8 +35,7 @@ def import_mesh(_filename):
         # read faces
         face_count = ctmGetInteger(ctm_context, CTM_TRIANGLE_COUNT)
         face_ctm = ctmGetIntegerArray(ctm_context, CTM_INDICES)
-        faces = np.fromiter(face_ctm,
-                            dtype=np.int,
+        faces = np.fromiter(face_ctm, dtype=np.int,
                             count=face_count * 3).reshape((-1, 3))
 
         # read face normals
@@ -54,36 +53,41 @@ def import_mesh(_filename):
 
 def export_mesh(_ctm, _filename):
     ctm_context = ctmNewContext(CTM_EXPORT)
-    
+
     if not str(_filename).lower().endswith('.ctm'):
         _filename += '.ctm'
 
     try:
         vertex_count = len(_ctm.vertices)
         vertices = _ctm.vertices.reshape((-1, 1))
-        p_vertices = ctypes.cast((CTMfloat * vertex_count * 3)(), ctypes.POINTER(CTMfloat))
+        p_vertices = ctypes.cast((CTMfloat * vertex_count * 3)(),
+                                 ctypes.POINTER(CTMfloat))
         for i in range(vertex_count * 3):
-            p_vertices[i] = CTMfloat(vertices[i])
+            p_vertices[i] = CTMfloat(vertices[i].item())
 
         face_count = len(_ctm.faces)
         faces = _ctm.faces.reshape((-1, 1))
-        p_faces = ctypes.cast((CTMuint * face_count * 3)(), ctypes.POINTER(CTMuint))
+        p_faces = ctypes.cast((CTMuint * face_count * 3)(),
+                              ctypes.POINTER(CTMuint))
         for i in range(face_count * 3):
-            p_faces[i] = CTMuint(faces[i])
+            p_faces[i] = CTMuint(faces[i].item())
 
         if _ctm.normals is not None:
             normal_count = len(_ctm.normals)
             normals = _ctm.normals.reshape((-1, 1))
-            p_normals = ctypes.cast((CTMfloat * normal_count * 3)(), ctypes.POINTER(CTMfloat))
+            p_normals = ctypes.cast((CTMfloat * normal_count * 3)(),
+                                    ctypes.POINTER(CTMfloat))
             for i in range(normal_count * 3):
-                p_normals[i] = CTMfloat(normals[i])
+                p_normals[i] = CTMfloat(normals[i].item())
         else:
             p_normals = None
 
-        ctmDefineMesh(ctm_context, p_vertices, CTMuint(vertex_count), p_faces, CTMuint(face_count), p_normals)
+        ctmDefineMesh(ctm_context, p_vertices, CTMuint(vertex_count), p_faces,
+                      CTMuint(face_count), p_normals)
         ctmSave(ctm_context, ctypes.c_char_p(_encode(_filename)))
     finally:
         ctmFreeContext(ctm_context)
+
 
 def _encode(_filename):
     try:
@@ -98,4 +102,3 @@ def _encode(_filename):
         pass
 
     return str(_filename).encode("utf-8", "surrogateescape")
-
