@@ -50,7 +50,7 @@ class MakeBuild(build_ext):
         make_args = ['-C', str(source_folder)] + makefile_args
         subprocess.check_call([makename] + make_args + ['openctm'], cwd=source_folder)
 
-        shared_object, = (source_folder / 'lib').glob(f'libopenctm.*')
+        shared_object, = (source_folder / 'lib').glob('libopenctm.*')
 
         # copy shared object to where it will be expected
         lib_folder = project_folder / 'openctm/libs'
