@@ -22,7 +22,9 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Run tests
         run: |
-          python -m pip install pipenv==2018.10.13
+          python -m pip install pipenv==2018.11.26
           pipenv install -d
+          pipenv run pip list
+          pipenv run pip show python-openctm
           pipenv run pytest tests
         shell: bash
