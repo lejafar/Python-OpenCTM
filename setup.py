@@ -74,7 +74,7 @@ setup(name='python-openctm',
       cmdclass=dict(build_ext=MakeBuild),
       zip_safe=False,
       packages=['openctm'],
-      package_data={'openctm': ['libs/*.dylib', 'libs/*.so']},
+      package_data={'openctm': ['libs/*']},
       install_requires=['numpy'],
       classifiers=[
           "Programming Language :: Python :: 2.7",
