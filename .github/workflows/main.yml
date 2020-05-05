@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        python: [2.7]
+        python: [3.7]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -59,6 +59,8 @@ jobs:
         with:
           python-version: 3.7
       - name: Build wheels
+        env:
+          CIBW_SKIP: cp27-* pp27-*
         run: |
           pip install cibuildwheel
           cibuildwheel --output-dir dist

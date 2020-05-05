@@ -77,7 +77,6 @@ setup(name='python-openctm',
       package_data={'openctm': ['libs/*']},
       install_requires=['numpy'],
       classifiers=[
-          "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6",
           "Programming Language :: Python :: 3.7",
