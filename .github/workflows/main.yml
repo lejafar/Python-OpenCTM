@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: |
           python -m pip install pipenv==2018.11.26
-          pipenv install -d --python ${{ matrix.python }}
+          pipenv install -d --python ${{ matrix.python }} --deploy
           pipenv run pytest tests
         shell: bash
 
