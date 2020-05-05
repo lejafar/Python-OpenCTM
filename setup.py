@@ -51,11 +51,13 @@ class MakeBuild(build_ext):
         subprocess.check_call([makename] + make_args + ['openctm'], cwd=source_folder)
 
         # copy shared object to where it will be expected
-        lib_folder = os.path.join(project_folder, 'openctm/libs')
+        lib_folder = os.path.join(project_folder, 'openctm', 'libs')
         if not os.path.exists(lib_folder):
             os.mkdir(lib_folder)
 
-        for shared_object in glob.glob(str(os.path.join(source_folder, 'lib')) + '/libopenctm.*'):
+        for shared_object in glob.glob(str(os.path.join(source_folder, 'lib', 'libopenctm.*'))):
+            shutil.copyfile(shared_object, os.path.join(lib_folder, os.path.basename(shared_object)))
+        for shared_object in glob.glob(str(os.path.join(source_folder, 'lib', '*.dll'))):
             shutil.copyfile(shared_object, os.path.join(lib_folder, os.path.basename(shared_object)))
 
 

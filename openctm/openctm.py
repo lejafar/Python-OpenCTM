@@ -94,14 +94,11 @@ CTM_ATTRIB_MAP_8 = 0x0807
 
 # depending on os chose you binary ...
 if sys.platform == 'darwin':
-    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
-                                 'libs/libopenctm.dylib')
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs', 'libopenctm.dylib')
 elif sys.platform.startswith('linux'):
-    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
-                                 'libs/libopenctm.so')
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs', 'libopenctm.so')
 elif sys.platform.startswith('win32'):
-    _ctm_lib_path = os.path.join(os.path.dirname(__file__),
-                                 'libs/libopenctm.a')
+    _ctm_lib_path = os.path.join(os.path.dirname(__file__), 'libs', 'libopenctm.dll')
     import glob
     for path in glob.glob(str(os.path.join(os.path.dirname(__file__))) + '/libs/*'):
         print(path)
