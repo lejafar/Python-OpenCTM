@@ -58,7 +58,6 @@ jobs:
         with:
           python-version: 3.7
       - name: Build wheels
-        env:
         run: |
           pip install cibuildwheel
           cibuildwheel --output-dir dist
