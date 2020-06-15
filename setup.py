@@ -1,7 +1,7 @@
 from setuptools import setup, Extension, find_packages
 import os
 
-exec(open('openctm/version.py').read())
+exec(open('openctmpy/version.py').read())
 
 long_description = ''
 if os.path.exists('README.md'):
