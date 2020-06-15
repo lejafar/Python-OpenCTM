@@ -11,7 +11,7 @@ if os.path.exists('README.md'):
 setup(
     name='python-openctm-nightly',
     version=__version__,
-    description='Python Interface for the OpenCTM File Format (nightly)',
+    description='Pure Python Interface for the OpenCTM File Format (nightly)',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/lejafar/python-openctm',
