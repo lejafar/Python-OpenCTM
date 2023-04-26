@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "95ef8703d7634e08c4c5796f1048e73f05018cf1a3830744112fac97d89be0e6"
+            "sha256": "4832123b5d65b17643804d2ab728f6606b05cdfe202642bf023d3f2099f2dfc2"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -106,7 +106,7 @@
         },
         "python-openctm": {
             "path": ".",
-            "version": "==1.0.11"
+            "version": "==1.0.12"
         },
         "tomli": {
             "hashes": [
@@ -123,6 +123,14 @@
             ],
             "index": "pypi",
             "version": "==3.21.5"
+        },
+        "zipp": {
+            "hashes": [
+                "sha256:112929ad649da941c23de50f356a2b5570c954b65150642bccdd66bf194d224b",
+                "sha256:48904fc76a60e542af151aded95726c1a5c34ed43ab4134b597665c86d7ad556"
+            ],
+            "index": "pypi",
+            "version": "==3.15.0"
         }
     }
 }
