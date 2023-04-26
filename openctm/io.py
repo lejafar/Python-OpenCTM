@@ -29,13 +29,13 @@ def import_mesh(_filename):
         vertex_ctm = ctmGetFloatArray(ctm_context, CTM_VERTICES)
 
         vertices = np.fromiter(vertex_ctm,
-                               dtype=np.float,
+                               dtype=float,
                                count=vertex_count * 3).reshape((-1, 3))
 
         # read faces
         face_count = ctmGetInteger(ctm_context, CTM_TRIANGLE_COUNT)
         face_ctm = ctmGetIntegerArray(ctm_context, CTM_INDICES)
-        faces = np.fromiter(face_ctm, dtype=np.int,
+        faces = np.fromiter(face_ctm, dtype=int,
                             count=face_count * 3).reshape((-1, 3))
 
         # read face normals
@@ -43,7 +43,7 @@ def import_mesh(_filename):
         if ctmGetInteger(ctm_context, CTM_HAS_NORMALS) == CTM_TRUE:
             normals_ctm = ctmGetFloatArray(ctm_context, CTM_NORMALS)
             normals = np.fromiter(normals_ctm,
-                                  dtype=np.float,
+                                  dtype=float,
                                   count=face_count * 3).reshape((-1, 3))
     finally:
         ctmFreeContext(ctm_context)

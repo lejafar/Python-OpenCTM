@@ -5,7 +5,7 @@ Python-OpenCTM
 
 Python-OpenCTM is a Python interface for the [OpenCTM](https://github.com/Danny02/OpenCTM) file format. A format that allows a geometry to be compressed to a fraction of comparable file formats (3DS, STL, COLLADA...).
 
-Pre-built python (**3.5**-**3.8**) wheels available for **Linux**, **MacOS** and **Windows**
+Pre-built python (**3.5**-**3.10**) wheels available for **Linux**, **MacOS** and **Windows**
 
 ## Installation
 
